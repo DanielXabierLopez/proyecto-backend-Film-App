@@ -1,16 +1,18 @@
 {
   "name": "proyecto-backend-film-app-frixi",
   "version": "1.0.0",
-  "description": "Se pide desarrollar una aplicación web de búsqueda y gestión de películas que contemple las siguientes funcionalidades y endpoints asociados. Trabajaremos sobre los conceptos vistos de Frontend y Backend en clase",
+  "description": "Aplicación web de búsqueda y gestión de películas",
   "main": "app.js",
+  "type": "commonjs",
   "directories": {
     "doc": "docs",
     "test": "test"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "repository": {
     "type": "git",
@@ -19,7 +21,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "commonjs",
   "bugs": {
     "url": "https://github.com/LunayGModder145/proyecto-backend-Film-App-Frixi/issues"
   },
@@ -32,6 +33,8 @@
     "pug": "^3.0.4"
   },
   "devDependencies": {
-    "nodemon": "^3.1.14"
+    "jest": "^30.5.2",
+    "nodemon": "^3.1.14",
+    "supertest": "^7.3.2"
   }
 }
