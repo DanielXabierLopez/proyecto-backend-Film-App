@@ -6,6 +6,8 @@
  * Mientras tanto vale undefined y las vistas lo tienen en cuenta.
  */
 
+const fakeUsers = require('../data/fakeUsers');
+
 /** GET / - Inicio con formulario de login */
 const getHome = (req, res) => {
     res.render('home', { title: 'Film App - Inicio' });
@@ -68,7 +70,8 @@ const getProfile = (req, res) => {
 /** GET /users - Lista de usuarios (admin) */
 const getUsers = async (req, res) => {
     // TODO: pedir la lista de usuarios a la base de datos SQL
-    const users = [];
+    // TEMPORAL: mientras tanto usamos los usuarios falsos
+    const users = fakeUsers;
 
     res.render('users', { title: 'Film App - Usuarios', user: req.user, users });
 };
