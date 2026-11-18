@@ -7,6 +7,7 @@ const connectDB = require('./config/mongoDB');
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
 const viewsRoutes = require("./routes/views.routes");
+const movieRoutes = require("./routes/movie.routes");
 const fakeUser = require('./middlewares/fakeUser.middleware');
 
 const app = express();
@@ -30,6 +31,9 @@ app.use(fakeUser);
 
 // Rutas de las vistas (Pug)
 app.use('/', viewsRoutes);
+
+// Rutas de la API
+app.use('/api', movieRoutes);
 
 // Solo arrancamos el servidor si MongoDB conecta
 connectDB()
