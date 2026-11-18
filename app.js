@@ -6,6 +6,7 @@ require('./config/sqlDB');
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
 const viewsRoutes = require("./routes/views.routes");
+const fakeUser = require('./middlewares/fakeUser.middleware');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,6 +23,9 @@ app.use(
     swaggerUi.serve,
     swaggerUi.setup(swaggerSpec)
 );
+
+// TEMPORAL: usuario falso en req.user hasta que exista la autenticación
+app.use(fakeUser);
 
 // Rutas de las vistas (Pug)
 app.use('/', viewsRoutes);
