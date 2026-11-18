@@ -4,45 +4,124 @@
 //- El "block" permite que cada vista meta sus propios botones dentro.
 mixin movieCard(movie)
   article.card
-    img.card__img(src=movie.image || 'https://placehold.co/300x450?text=Sin+imagen' alt=movie.title)
+    img.card__img(
+      src=movie.poster || 'https://placehold.co/300x450?text=Sin+imagen'
+      alt=movie.title
+    )
+
     .card__body
       h3.card__title= movie.title
+
       ul.card__info
         li
-          strong Año: 
-          | #{movie.year}
+          strong Año:
+          |  #{movie.year}
+
         li
-          strong Director: 
-          | #{movie.director}
+          strong Director:
+          |  #{movie.director}
+
         li
-          strong Género: 
-          | #{movie.genre}
+          strong Género:
+          |  #{movie.genre}
+
         li
-          strong Duración: 
-          | #{movie.runtime}
+          strong Duración:
+          |  #{movie.runtime} min
+
       .card__actions
         block
 
-//- Formulario "Añadir a Favoritos": solo manda el id y el origen (OMDB o MongoDB),
-//- no los datos de la película (ver "Sobre el modelo de datos" en el README).
+
+//- Formulario "Añadir a Favoritos": solo manda el id y el origen (OMDB o MongoDB)
+//- no los datos de la película.
 mixin addFavorite(movie)
   form(method="POST" action="/api/favorites")
     input(type="hidden" name="movieId" value=movie.id)
     input(type="hidden" name="source" value=movie.source)
-    button.btn.btn--primary(type="submit") ★ Añadir a Favoritos
+    button.btn.btn--primary(type="submit")
+      | ★ Añadir a Favoritos
+
 
 //- Campos de la película (crear y editar usan el mismo formulario)
 mixin movieFields(movie)
+
   - movie = movie || {}
+
   label(for="title") Título completo
-  input#title(type="text" name="title" value=movie.title required minlength="1")
-  label(for="image") Imagen representativa (URL)
-  input#image(type="url" name="image" value=movie.image required)
+  input#title(
+    type="text"
+    name="title"
+    value=movie.title
+    required
+    minlength="1"
+  )
+
+  label(for="poster") Imagen representativa (URL)
+  input#poster(
+    type="url"
+    name="poster"
+    value=movie.poster
+    required
+  )
+
   label(for="year") Año
-  input#year(type="number" name="year" value=movie.year required min="1888" max="2100")
+  input#year(
+    type="number"
+    name="year"
+    value=movie.year
+    required
+    min="1888"
+    max="2100"
+  )
+
   label(for="director") Director
-  input#director(type="text" name="director" value=movie.director required)
+  input#director(
+    type="text"
+    name="director"
+    value=movie.director
+    required
+  )
+
   label(for="genre") Género
-  input#genre(type="text" name="genre" value=movie.genre required)
+  input#genre(
+    type="text"
+    name="genre"
+    value=movie.genre
+    required
+  )
+
   label(for="runtime") Duración (minutos)
-  input#runtime(type="number" name="runtime" value=movie.runtime required min="1")
+  input#runtime(
+    type="number"
+    name="runtime"
+    value=movie.runtime
+    required
+    min="1"
+  )
+
+  label(for="synopsis") Sinopsis
+  textarea#synopsis(
+    name="synopsis"
+    rows="5"
+    required
+  )= movie.synopsis
+
+  label(for="actors") Actores (separados por comas)
+  input#actors(
+    type="text"
+    name="actors"
+    value=movie.actors ? movie.actors.join(', ') : ''
+    required
+  )
+
+  label(for="rating") Valoración (0-10)
+  input#rating(
+    type="number"
+    name="rating"
+    value=movie.rating
+    min="0"
+    max="10"
+    step="0.1"
+    required
+  )

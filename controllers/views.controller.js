@@ -7,6 +7,7 @@
  */
 
 const fakeUsers = require('../data/fakeUsers');
+const Movie = require('../models/movie.model');
 
 /** GET / - Inicio con formulario de login */
 const getHome = (req, res) => {
@@ -25,55 +26,84 @@ const getSignup = (req, res) => {
 
 /** GET /dashboard - Panel de control del usuario */
 const getDashboard = (req, res) => {
-    res.render('dashboard', { title: 'Film App - Panel de control', user: req.user });
+    res.render('dashboard', {
+        title: 'Film App - Panel de control',
+        user: req.user
+    });
 };
 
 /** GET /search?title=... - Buscador de películas */
 const getSearch = async (req, res) => {
+
     const query = req.query.title;
-    // TODO: si hay query, pedir las películas al servicio de búsqueda (OMDB y después MongoDB)
     const movies = [];
 
-    res.render('search', { title: 'Film App - Buscar', user: req.user, query, movies });
+    res.render('search', {
+        title: 'Film App - Buscar',
+        user: req.user,
+        query,
+        movies
+    });
 };
 
 /** GET /search/:title - Detalle de una película */
 const getDetail = async (req, res) => {
-    // TODO: pedir al servicio de búsqueda la película con req.params.title
+
     const movie = null;
 
-    res.render('detail', { title: 'Film App - Detalle', user: req.user, movie });
+    res.render('detail', {
+        title: 'Film App - Detalle',
+        user: req.user,
+        movie
+    });
 };
 
 /**
- * GET /movies (y /favorites)
- * El README usa /movies para el usuario (sus favoritas) y para el admin (gestión),
- * así que se elige la vista según el rol.
+ * GET /movies
  */
 const getMovies = async (req, res) => {
+
     if (req.user && req.user.role === 'admin') {
-        // TODO: pedir todas las películas de MongoDB
-        const movies = [];
-        return res.render('adminMovies', { title: 'Film App - Gestionar películas', user: req.user, movies });
+
+        const movies = await Movie.find().lean();
+
+        console.log('PELICULAS ENCONTRADAS:');
+        console.log(movies);
+
+        return res.render('adminMovies', {
+            title: 'Film App - Gestionar películas',
+            user: req.user,
+            movies
+        });
     }
 
-    // TODO: pedir los favoritos del usuario (SQL) y sus datos a su fuente (OMDB o MongoDB)
     const movies = [];
-    res.render('movies', { title: 'Film App - Mis películas', user: req.user, movies });
+
+    res.render('movies', {
+        title: 'Film App - Mis películas',
+        user: req.user,
+        movies
+    });
 };
 
-/** GET /profile - Perfil del usuario o del administrador */
+/** GET /profile */
 const getProfile = (req, res) => {
-    res.render('profile', { title: 'Film App - Mi perfil', user: req.user });
+    res.render('profile', {
+        title: 'Film App - Mi perfil',
+        user: req.user
+    });
 };
 
-/** GET /users - Lista de usuarios (admin) */
+/** GET /users */
 const getUsers = async (req, res) => {
-    // TODO: pedir la lista de usuarios a la base de datos SQL
-    // TEMPORAL: mientras tanto usamos los usuarios falsos
+
     const users = fakeUsers;
 
-    res.render('users', { title: 'Film App - Usuarios', user: req.user, users });
+    res.render('users', {
+        title: 'Film App - Usuarios',
+        user: req.user,
+        users
+    });
 };
 
 module.exports = {
