@@ -1,5 +1,6 @@
 const express = require("express");
 const movieController = require("../controllers/movie.controller");
+const checkRole = require("../middlewares/role.middleware");
 
 const router = express.Router();
 
@@ -87,5 +88,44 @@ const router = express.Router();
  *         description: Error al buscar películas
  */
 router.get("/movie/:title", movieController.getMovieByTitle);
+
+/**
+ * @swagger
+ * /api/movie/{id}:
+ *   put:
+ *     summary: Editar una película (solo admin)
+ *     tags: [Movies]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: _id de la película en MongoDB
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example:
+ *               title: The Matrix
+ *               year: 1999
+ *               runtime: 136
+ *     responses:
+ *       200:
+ *         description: Película editada
+ *       400:
+ *         description: Id no válido o datos que no pasan la validación
+ *       401:
+ *         description: No autenticado
+ *       403:
+ *         description: No es administrador
+ *       404:
+ *         description: La película no existe
+ *       500:
+ *         description: Error al editar la película
+ */
+router.put("/movie/:id", checkRole(["admin"]), movieController.updateMovie);
 
 module.exports = router;

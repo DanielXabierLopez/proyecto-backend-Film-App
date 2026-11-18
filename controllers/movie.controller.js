@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const movieService = require("../services/movie.service");
 
 /**
@@ -33,6 +34,49 @@ const getMovieByTitle = async (req, res) => {
     }
 };
 
+/**
+ * PUT /api/movie/:id (solo admin)
+ * Edita una película de MongoDB con los datos del body.
+ *
+ * - 200 `{ movie }` si se ha editado.
+ * - 400 si el id no es válido o los datos no pasan la validación del modelo.
+ * - 404 si no existe ninguna película con ese id.
+ * - 500 si ocurre un error inesperado.
+ *
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ */
+const updateMovie = async (req, res) => {
+    const { id } = req.params;
+
+    if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({ message: "El id no es válido" });
+    }
+
+    try {
+        const movie = await movieService.updateMovie(id, req.body);
+
+        if (!movie) {
+            return res.status(404).json({ message: "La película no existe" });
+        }
+
+        return res.status(200).json({ movie });
+    } catch (error) {
+        // ValidationError: no cumple las reglas del modelo (ej. año fuera de rango)
+        // CastError: un campo tiene un tipo incorrecto (ej. year: "abc")
+        if (error.name === "ValidationError" || error.name === "CastError") {
+            const errors = error.errors
+                ? Object.values(error.errors).map((err) => err.message)
+                : [error.message];
+            return res.status(400).json({ message: "Datos no válidos", errors });
+        }
+
+        console.error("Error en PUT /api/movie/:id:", error);
+        return res.status(500).json({ message: "Error al editar la película" });
+    }
+};
+
 module.exports = {
-    getMovieByTitle
+    getMovieByTitle,
+    updateMovie
 };

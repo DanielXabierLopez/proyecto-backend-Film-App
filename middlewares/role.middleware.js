@@ -8,7 +8,7 @@ const checkRole = (allowedRoles) => {
 
     if (!user) {
       if (isApi) {
-        return res.status(401).json({ error: 'No autenticado' });
+        return res.status(401).json({ message: 'No autenticado' });
       }
       return res.redirect('/');
     }
@@ -22,7 +22,7 @@ const checkRole = (allowedRoles) => {
 
     // Si no tiene el rol, se deniega el acceso
     if (isApi) {
-      return res.status(403).json({ error: 'No tienes permisos' });
+      return res.status(403).json({ message: 'No tienes permisos' });
     }
     return res.status(403).send('Acceso denegado: No tienes los permisos.');
   };
