@@ -1,0 +1,27 @@
+extends layout
+include mixins
+
+block content
+  include menu
+  main.container
+    a.back(href="/search") ← Volver al buscador
+
+    if movie
+      article.detail
+        img.detail__img(src=movie.image || 'https://placehold.co/300x450?text=Sin+imagen' alt=movie.title)
+        .detail__body
+          h1= movie.title
+          p.detail__meta #{movie.year} · #{movie.genre} · #{movie.runtime}
+          if movie.rating
+            p.rating ★ #{movie.rating}
+          p
+            strong Director: 
+            | #{movie.director}
+          p
+            strong Actores: 
+            | #{movie.actors}
+          h2 Sinopsis
+          p= movie.plot
+          +addFavorite(movie)
+    else
+      p.empty No se ha encontrado la película.
