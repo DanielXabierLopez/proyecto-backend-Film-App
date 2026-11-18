@@ -1,0 +1,48 @@
+//- Mixins reutilizables. Se usan con "include mixins" en cada vista.
+
+//- Tarjeta de película: lo que se ve en buscador, favoritos y gestión.
+//- El "block" permite que cada vista meta sus propios botones dentro.
+mixin movieCard(movie)
+  article.card
+    img.card__img(src=movie.image || 'https://placehold.co/300x450?text=Sin+imagen' alt=movie.title)
+    .card__body
+      h3.card__title= movie.title
+      ul.card__info
+        li
+          strong Año: 
+          | #{movie.year}
+        li
+          strong Director: 
+          | #{movie.director}
+        li
+          strong Género: 
+          | #{movie.genre}
+        li
+          strong Duración: 
+          | #{movie.runtime}
+      .card__actions
+        block
+
+//- Formulario "Añadir a Favoritos": solo manda el id y el origen (OMDB o MongoDB),
+//- no los datos de la película (ver "Sobre el modelo de datos" en el README).
+mixin addFavorite(movie)
+  form(method="POST" action="/api/favorites")
+    input(type="hidden" name="movieId" value=movie.id)
+    input(type="hidden" name="source" value=movie.source)
+    button.btn.btn--primary(type="submit") ★ Añadir a Favoritos
+
+//- Campos de la película (crear y editar usan el mismo formulario)
+mixin movieFields(movie)
+  - movie = movie || {}
+  label(for="title") Título completo
+  input#title(type="text" name="title" value=movie.title required minlength="1")
+  label(for="image") Imagen representativa (URL)
+  input#image(type="url" name="image" value=movie.image required)
+  label(for="year") Año
+  input#year(type="number" name="year" value=movie.year required min="1888" max="2100")
+  label(for="director") Director
+  input#director(type="text" name="director" value=movie.director required)
+  label(for="genre") Género
+  input#genre(type="text" name="genre" value=movie.genre required)
+  label(for="runtime") Duración (minutos)
+  input#runtime(type="number" name="runtime" value=movie.runtime required min="1")
