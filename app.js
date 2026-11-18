@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 require('dotenv').config();
+require('./config/sqlDB');
 
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
