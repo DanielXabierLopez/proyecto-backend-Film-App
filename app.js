@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 require('dotenv').config();
 require('./config/sqlDB');
+const connectDB = require('./config/mongoDB');
 
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
@@ -26,9 +27,17 @@ app.use(
 // Rutas de las vistas (Pug)
 app.use('/', viewsRoutes);
 
-app.listen(PORT, () => {
-    console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
+// Solo arrancamos el servidor si MongoDB conecta
+connectDB()
+    .then(() => {
+        app.listen(PORT, () => {
+            console.log(`Servidor corriendo en http://localhost:${PORT}`);
+        });
+    })
+    .catch(() => {
+        console.error('No se pudo conectar a MongoDB. El servidor no se ha iniciado.');
+        process.exit(1);
+    });
 const userRoutes = require("./routes/user.routes");
 
 app.use("/api", userRoutes);
