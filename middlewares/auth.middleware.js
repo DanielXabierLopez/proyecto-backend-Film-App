@@ -4,7 +4,11 @@ const isAuthenticated = (req, res, next) => {
     return next();
   }
   
-  // Si no hay sesión activa, se te redirige a la página principal (/)
+  // Si no hay sesión activa: la API responde 401 en JSON,
+  // las vistas redirigen a la página principal (/)
+  if (req.originalUrl.startsWith('/api')) {
+    return res.status(401).json({ error: 'No autenticado' });
+  }
   return res.redirect('/');
 };
 
