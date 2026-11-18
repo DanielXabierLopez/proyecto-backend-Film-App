@@ -5,6 +5,7 @@ require('./config/sqlDB');
 
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
+const viewsRoutes = require("./routes/views.routes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,11 +23,8 @@ app.use(
     swaggerUi.setup(swaggerSpec)
 );
 
-app.get('/', (req, res) => {
-    res.render('home', {
-        title: 'Nombre para la app de peliculas aquí - Inicio'
-    });
-});
+// Rutas de las vistas (Pug)
+app.use('/', viewsRoutes);
 
 app.listen(PORT, () => {
     console.log(`Servidor corriendo en http://localhost:${PORT}`);

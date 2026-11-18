@@ -1,0 +1,29 @@
+extends layout
+
+block content
+  include menu
+  main.container
+    h1 Mi perfil
+
+    if user
+      .panel
+        p
+          strong Nombre: 
+          | #{user.name}
+        p
+          strong Email: 
+          | #{user.email}
+        p
+          strong Rol: 
+          | #{user.role}
+
+      //- PUT /api/user se enviará con fetch desde JS
+      form.form.panel.js-edit-profile
+        h2 Editar datos
+        label(for="name") Nombre
+        input#name(type="text" name="name" value=user.name required)
+        label(for="email") Email
+        input#email(type="email" name="email" value=user.email required)
+        button.btn.btn--primary(type="submit") Guardar cambios
+    else
+      p.empty No hay ningún usuario con la sesión iniciada.

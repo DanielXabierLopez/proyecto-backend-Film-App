@@ -1,0 +1,17 @@
+extends layout
+include mixins
+
+block content
+  include menu
+  main.container
+    h1 Mis películas
+
+    if movies && movies.length
+      .grid
+        each movie in movies
+          +movieCard(movie)
+            //- DELETE no se puede enviar con un form HTML: el JS lo hará con fetch
+            button.btn.btn--danger.js-remove-favorite(type="button" data-id=movie.id data-source=movie.source) Quitar de Mis películas
+    else
+      p.empty Aún no tienes películas guardadas.
+      a.btn.btn--primary(href="/search") Buscar películas
