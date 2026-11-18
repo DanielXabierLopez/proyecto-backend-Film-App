@@ -71,7 +71,26 @@ const searchMovies = async (title) => {
     return searchInMongo(title);
 };
 
+/**
+ * Edita una película de MongoDB.
+ * - runValidators: aplica las validaciones del modelo también al editar.
+ * - returnDocument 'after': devuelve la película ya editada (no la antigua).
+ *
+ * @param {string} id _id de la película en MongoDB.
+ * @param {Object} data Campos nuevos de la película.
+ * @returns {Promise<MovieResult|null>} La película editada, o null si no existe.
+ */
+const updateMovie = async (id, data) => {
+    const movie = await Movie.findByIdAndUpdate(id, data, {
+        runValidators: true,
+        returnDocument: "after"
+    }).lean();
+
+    return movie ? normalizeMongoMovie(movie) : null;
+};
+
 module.exports = {
     normalizeMongoMovie,
-    searchMovies
+    searchMovies,
+    updateMovie
 };
