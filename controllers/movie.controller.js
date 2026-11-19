@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const movieService = require("../services/movie.service");
+const Favorite = require("../models/favorite.model");
 
 /**
  * GET /api/movie/:title
@@ -119,9 +120,10 @@ const updateMovie = async (req, res) => {
 
 /**
  * DELETE /api/movie/:id (solo admin)
- * Elimina una película de MongoDB por su _id.
+ * Elimina una película de MongoDB por su _id y sus favoritos en SQL (de todos los usuarios).
  *
- * - 200 `{ message: "Película eliminada", movie }` si se ha borrado.
+ * - 200 `{ message: "Película eliminada", movie, favoritesDeleted }` si se ha borrado.
+ *   `favoritesDeleted` es el número de favoritos borrados (0 si falló el borrado en SQL).
  * - 400 si el id no es un ObjectId válido.
  * - 404 `{ message: "La película no existe" }` si no existe ninguna película con ese id.
  * - 500 si ocurre un error inesperado.
@@ -143,9 +145,18 @@ const deleteMovie = async (req, res) => {
             return res.status(404).json({ message: "La película no existe" });
         }
 
-        // TODO: borrar también los favoritos de esta película (SQL). Esa parte se hará cuando exista la tabla de favoritos.
+        // Se borran los favoritos DESPUÉS de borrar en Mongo: si fallara Mongo,
+        // los usuarios no perderían favoritos de una película que sigue existiendo.
+        // Si falla SQL, la película ya está borrada: se avisa en consola y se responde 200
+        // (los favoritos huérfanos los ignora GET /api/favorites).
+        let favoritesDeleted = 0;
+        try {
+            favoritesDeleted = await Favorite.removeByMovie(id, "mongo");
+        } catch (sqlError) {
+            console.error("Película borrada, pero no se pudieron borrar sus favoritos:", sqlError);
+        }
 
-        return res.status(200).json({ message: "Película eliminada", movie });
+        return res.status(200).json({ message: "Película eliminada", movie, favoritesDeleted });
     } catch (error) {
         console.error("Error en DELETE /api/movie/:id:", error);
         return res.status(500).json({ message: "Error al eliminar la película" });
