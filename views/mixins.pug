@@ -4,7 +4,7 @@
 //- El "block" permite que cada vista meta sus propios botones dentro.
 mixin movieCard(movie)
   article.card
-    img.card__img(src=movie.image || 'https://placehold.co/300x450?text=Sin+imagen' alt=movie.title)
+    img.card__img(src=movie.poster || 'https://placehold.co/300x450?text=Sin+imagen' alt=movie.title)
     .card__body
       h3.card__title= movie.title
       ul.card__info
@@ -19,7 +19,7 @@ mixin movieCard(movie)
           | #{movie.genre}
         li
           strong Duración: 
-          | #{movie.runtime}
+          | #{movie.runtime ? movie.runtime + ' min' : ''}
       .card__actions
         block
 
@@ -36,13 +36,21 @@ mixin movieFields(movie)
   - movie = movie || {}
   label(for="title") Título completo
   input#title(type="text" name="title" value=movie.title required minlength="1")
-  label(for="image") Imagen representativa (URL)
-  input#image(type="url" name="image" value=movie.image required)
+  label(for="poster") Imagen representativa (URL)
+  input#poster(type="url" name="poster" value=movie.poster required)
   label(for="year") Año
-  input#year(type="number" name="year" value=movie.year required min="1888" max="2100")
+  //- Mismo máximo que el modelo (models/movie.model.js): año actual + 5
+  input#year(type="number" name="year" value=movie.year required min="1888" max=new Date().getFullYear() + 5)
   label(for="director") Director
   input#director(type="text" name="director" value=movie.director required)
   label(for="genre") Género
   input#genre(type="text" name="genre" value=movie.genre required)
   label(for="runtime") Duración (minutos)
   input#runtime(type="number" name="runtime" value=movie.runtime required min="1")
+  label(for="synopsis") Sinopsis
+  textarea#synopsis(name="synopsis" rows="4" required)= movie.synopsis
+  //- Llega al backend como texto: allí hay que partirlo por comas para guardar un array
+  label(for="actors") Actores principales (separados por comas)
+  input#actors(type="text" name="actors" value=(movie.actors || []).join(', ') required placeholder="Keanu Reeves, Carrie-Anne Moss")
+  label(for="rating") Valoración (0-10)
+  input#rating(type="number" name="rating" value=movie.rating required min="0" max="10" step="0.1")

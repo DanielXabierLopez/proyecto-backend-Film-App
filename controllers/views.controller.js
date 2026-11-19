@@ -7,6 +7,7 @@
  */
 
 const fakeUsers = require('../data/fakeUsers');
+const movieService = require('../services/movie.service');
 
 /** GET / - Inicio con formulario de login */
 const getHome = (req, res) => {
@@ -28,21 +29,47 @@ const getDashboard = (req, res) => {
     res.render('dashboard', { title: 'Film App - Panel de control', user: req.user });
 };
 
-/** GET /search?title=... - Buscador de películas */
+/** GET /search?title=... - Buscador de películas (OMDB y, si no hay nada, MongoDB) */
 const getSearch = async (req, res) => {
-    const query = req.query.title;
-    // TODO: si hay query, pedir las películas al servicio de búsqueda (OMDB y después MongoDB)
-    const movies = [];
+    const query = (req.query.title || '').trim();
+    let movies = [];
+    let error = null;
 
-    res.render('search', { title: 'Film App - Buscar', user: req.user, query, movies });
+    if (query) {
+        try {
+            movies = await movieService.searchMovies(query);
+        } catch (err) {
+            console.error('Error en GET /search:', err);
+            error = 'No se han podido buscar películas. Inténtalo de nuevo.';
+        }
+    }
+
+    res.render('search', { title: 'Film App - Buscar', user: req.user, query, movies, error });
 };
 
-/** GET /search/:title - Detalle de una película */
+/**
+ * GET /search/:title - Detalle de una película.
+ * Se busca por título y se elige la que coincide exactamente (sin mayúsculas);
+ * si ninguna coincide exacta, la primera de los resultados.
+ */
 const getDetail = async (req, res) => {
-    // TODO: pedir al servicio de búsqueda la película con req.params.title
-    const movie = null;
+    const title = (req.params.title || '').trim();
+    let movie = null;
+    let error = null;
 
-    res.render('detail', { title: 'Film App - Detalle', user: req.user, movie });
+    try {
+        const movies = await movieService.searchMovies(title);
+        movie = movies.find(m => m.title.toLowerCase() === title.toLowerCase()) || movies[0] || null;
+    } catch (err) {
+        console.error('Error en GET /search/:title:', err);
+        error = 'No se ha podido cargar la película. Inténtalo de nuevo.';
+    }
+
+    let status = 200;
+    if (error) status = 500;
+    else if (!movie) status = 404;
+
+    res.status(status).render('detail', { title: 'Film App - Detalle', user: req.user, movie, error });
 };
 
 /**

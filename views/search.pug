@@ -10,7 +10,9 @@ block content
       input(type="search" name="title" value=query placeholder="Escribe un título..." required aria-label="Título de la película")
       button.btn.btn--primary(type="submit") 🔍
 
-    if query
+    if error
+      p.empty= error
+    else if query
       if movies && movies.length
         p.muted #{movies.length} resultado(s) para "#{query}"
         .grid

@@ -120,7 +120,8 @@ img {
     color: var(--muted);
 }
 
-input {
+input,
+textarea {
     width: 100%;
     padding: 0.7rem;
     border: 1px solid var(--surface-2);
@@ -130,7 +131,8 @@ input {
     font: inherit;
 }
 
-input:focus {
+input:focus,
+textarea:focus {
     outline: 2px solid var(--primary);
     outline-offset: 1px;
 }

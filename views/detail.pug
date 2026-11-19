@@ -6,12 +6,14 @@ block content
   main.container
     a.back(href="/search") ← Volver al buscador
 
-    if movie
+    if error
+      p.empty= error
+    else if movie
       article.detail
-        img.detail__img(src=movie.image || 'https://placehold.co/300x450?text=Sin+imagen' alt=movie.title)
+        img.detail__img(src=movie.poster || 'https://placehold.co/300x450?text=Sin+imagen' alt=movie.title)
         .detail__body
           h1= movie.title
-          p.detail__meta #{movie.year} · #{movie.genre} · #{movie.runtime}
+          p.detail__meta #{movie.year} · #{movie.genre} · #{movie.runtime ? movie.runtime + ' min' : ''}
           if movie.rating
             p.rating ★ #{movie.rating}
           p
@@ -19,9 +21,9 @@ block content
             | #{movie.director}
           p
             strong Actores: 
-            | #{movie.actors}
+            | #{(movie.actors || []).join(', ')}
           h2 Sinopsis
-          p= movie.plot
+          p= movie.synopsis
           +addFavorite(movie)
     else
       p.empty No se ha encontrado la película.
