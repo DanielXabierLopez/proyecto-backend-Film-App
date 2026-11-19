@@ -128,4 +128,33 @@ router.get("/movie/:title", movieController.getMovieByTitle);
  */
 router.put("/movie/:id", checkRole(["admin"]), movieController.updateMovie);
 
+/**
+ * @swagger
+ * /api/movie/{id}:
+ *   delete:
+ *     summary: Eliminar una película (solo admin)
+ *     tags: [Movies]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: _id de la película en MongoDB
+ *     responses:
+ *       200:
+ *         description: Película eliminada
+ *       400:
+ *         description: Id no válido
+ *       401:
+ *         description: No autenticado
+ *       403:
+ *         description: No es administrador
+ *       404:
+ *         description: La película no existe
+ *       500:
+ *         description: Error al eliminar la película
+ */
+router.delete("/movie/:id", checkRole(["admin"]), movieController.deleteMovie);
+
 module.exports = router;
