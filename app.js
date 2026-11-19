@@ -46,6 +46,10 @@ app.use('/api', userRoutes);
 app.use('/', movieRoutes);
 
 // Arranque del servidor tras conectar Mongo
+// Rutas de la API
+app.use('/api', movieRoutes);
+
+// Solo arrancamos el servidor si MongoDB conecta
 connectDB()
   .then(() => {
     app.listen(PORT, () => {
@@ -58,3 +62,9 @@ connectDB()
     );
     process.exit(1);
   });
+const userRoutes = require("./routes/user.routes");
+
+app.use("/api", userRoutes);
+
+const authRoutes = require('./routes/auth.routes');
+app.use('/api/auth', authRoutes);

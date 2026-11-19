@@ -9,6 +9,7 @@ mixin movieCard(movie)
       alt=movie.title
     )
 
+    img.card__img(src=movie.poster || 'https://placehold.co/300x450?text=Sin+imagen' alt=movie.title)
     .card__body
       h3.card__title= movie.title
 
@@ -29,6 +30,8 @@ mixin movieCard(movie)
           strong Duración:
           |  #{movie.runtime} min
 
+          strong Duración: 
+          | #{movie.runtime ? movie.runtime + ' min' : ''}
       .card__actions
         block
 
