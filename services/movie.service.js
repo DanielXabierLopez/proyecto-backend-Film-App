@@ -89,8 +89,21 @@ const updateMovie = async (id, data) => {
     return movie ? normalizeMongoMovie(movie) : null;
 };
 
+/**
+ * Elimina una película de MongoDB por su _id.
+ *
+ * @param {string} id _id de la película en MongoDB.
+ * @returns {Promise<MovieResult|null>} La película borrada normalizada, o null si no existía.
+ */
+const deleteMovie = async (id) => {
+    const movie = await Movie.findByIdAndDelete(id).lean();
+
+    return movie ? normalizeMongoMovie(movie) : null;
+};
+
 module.exports = {
     normalizeMongoMovie,
     searchMovies,
-    updateMovie
+    updateMovie,
+    deleteMovie
 };

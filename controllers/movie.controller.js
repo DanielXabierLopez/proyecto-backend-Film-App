@@ -76,7 +76,43 @@ const updateMovie = async (req, res) => {
     }
 };
 
+/**
+ * DELETE /api/movie/:id (solo admin)
+ * Elimina una película de MongoDB por su _id.
+ *
+ * - 200 `{ message: "Película eliminada", movie }` si se ha borrado.
+ * - 400 si el id no es un ObjectId válido.
+ * - 404 `{ message: "La película no existe" }` si no existe ninguna película con ese id.
+ * - 500 si ocurre un error inesperado.
+ *
+ * @param {import("express").Request} req
+ * @param {import("express").Response} res
+ */
+const deleteMovie = async (req, res) => {
+    const { id } = req.params;
+
+    if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({ message: "El id no es válido" });
+    }
+
+    try {
+        const movie = await movieService.deleteMovie(id);
+
+        if (!movie) {
+            return res.status(404).json({ message: "La película no existe" });
+        }
+
+        // TODO: borrar también los favoritos de esta película (SQL). Esa parte se hará cuando exista la tabla de favoritos.
+
+        return res.status(200).json({ message: "Película eliminada", movie });
+    } catch (error) {
+        console.error("Error en DELETE /api/movie/:id:", error);
+        return res.status(500).json({ message: "Error al eliminar la película" });
+    }
+};
+
 module.exports = {
     getMovieByTitle,
-    updateMovie
+    updateMovie,
+    deleteMovie
 };
