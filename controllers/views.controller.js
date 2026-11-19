@@ -8,6 +8,7 @@
 
 const fakeUsers = require('../data/fakeUsers');
 const movieService = require('../services/movie.service');
+const favoriteService = require('../services/favorite.service');
 
 /** GET / - Inicio con formulario de login */
 const getHome = (req, res) => {
@@ -84,9 +85,18 @@ const getMovies = async (req, res) => {
         return res.render('adminMovies', { title: 'Film App - Gestionar películas', user: req.user, movies });
     }
 
-    // TODO: pedir los favoritos del usuario (SQL) y sus datos a su fuente (OMDB o MongoDB)
-    const movies = [];
-    res.render('movies', { title: 'Film App - Mis películas', user: req.user, movies });
+    // Favoritos del usuario (SQL) con sus datos pedidos a su fuente (OMDB o MongoDB)
+    let movies = [];
+    let error = null;
+
+    try {
+        movies = await favoriteService.getFavoriteMovies(req.user.id);
+    } catch (err) {
+        console.error('Error en GET /movies:', err);
+        error = 'No se han podido cargar tus películas. Inténtalo de nuevo.';
+    }
+
+    res.status(error ? 500 : 200).render('movies', { title: 'Film App - Mis películas', user: req.user, movies, error });
 };
 
 /** GET /profile - Perfil del usuario o del administrador */
