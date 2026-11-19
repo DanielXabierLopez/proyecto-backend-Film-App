@@ -361,6 +361,28 @@ textarea:focus {
     gap: 0.5rem;
 }
 
+/* Mensaje tras añadir/quitar favoritos (lo rellena public/js/favorites.js) */
+.card__msg {
+    width: 100%;
+    margin: 0.25rem 0 0;
+    font-size: 0.85rem;
+    color: var(--primary);
+}
+
+.card__msg:empty {
+    display: none;
+}
+
+.card__msg--error {
+    color: #ffb3b5;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: default;
+    transform: none;
+}
+
 /* ---------- 10. Detalle de película ---------- */
 .back {
     display: inline-block;

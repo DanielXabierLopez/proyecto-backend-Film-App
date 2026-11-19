@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const Favorite = require("../models/favorite.model");
-const movieService = require("../services/movie.service");
+const favoriteService = require("../services/favorite.service");
 
 const VALID_SOURCES = ["omdb", "mongo"];
 
@@ -73,16 +73,7 @@ const addFavorite = async (req, res) => {
  */
 const getFavorites = async (req, res) => {
     try {
-        const favorites = await Favorite.getByUser(req.user.id);
-
-        const results = await Promise.allSettled(
-            favorites.map((fav) => movieService.getMovieBySource(fav.movie_id, fav.source))
-        );
-
-        const movies = results
-            .filter((result) => result.status === "fulfilled" && result.value)
-            .map((result) => result.value);
-
+        const movies = await favoriteService.getFavoriteMovies(req.user.id);
         return res.status(200).json({ movies });
     } catch (err) {
         console.error("Error en GET /api/favorites:", err);
