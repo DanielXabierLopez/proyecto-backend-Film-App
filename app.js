@@ -5,14 +5,13 @@ require('dotenv').config();
 require('./config/sqlDB');
 const connectDB = require('./config/mongoDB');
 
-const swaggerUi = require('swagger-ui-express');
-const swaggerSpec = require('./config/swagger');
-
-const viewsRoutes = require('./routes/views.routes');
-const userRoutes = require('./routes/user.routes');
-const movieRoutes = require('./routes/movie.routes');
-
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./config/swagger");
+const viewsRoutes = require("./routes/views.routes");
+const movieRoutes = require("./routes/movie.routes");
+const favoritesRoutes = require("./routes/favorites.routes");
 const fakeUser = require('./middlewares/fakeUser.middleware');
+const checkRole = require('./middlewares/role.middleware');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -48,6 +47,7 @@ app.use('/', movieRoutes);
 // Arranque del servidor tras conectar Mongo
 // Rutas de la API
 app.use('/api', movieRoutes);
+app.use('/api/favorites', checkRole(['user']), favoritesRoutes);
 
 // Solo arrancamos el servidor si MongoDB conecta
 connectDB()
