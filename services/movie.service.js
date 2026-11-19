@@ -101,9 +101,61 @@ const deleteMovie = async (id) => {
     return movie ? normalizeMongoMovie(movie) : null;
 };
 
+/**
+ * Crea una película en MongoDB.
+ * - Solo se guardan los campos del modelo (no se puede colar un _id, createdAt...).
+ * - Si `actors` llega como texto ("Actor 1, Actor 2", típico de un formulario),
+ *   se convierte en array.
+ * - La validación la hace el esquema de Mongoose: si algo no cumple,
+ *   `create` lanza un ValidationError o CastError.
+ *
+ * @param {Object} data Datos de la película (normalmente req.body).
+ * @returns {Promise<MovieResult>} La película creada normalizada.
+ */
+const createMovie = async (data = {}) => {
+    const { title, poster, year, director, genre, runtime, synopsis, rating } = data;
+    let { actors } = data;
+
+    if (typeof actors === "string") {
+        actors = actors
+            .split(",")
+            .map((actor) => actor.trim())
+            .filter((actor) => actor !== "");
+    }
+
+    const movie = await Movie.create({
+        title, poster, year, director, genre, runtime, synopsis, actors, rating
+    });
+
+    return normalizeMongoMovie(movie.toObject());
+};
+
+/**
+ * Obtiene una película completa pidiéndola a su fuente original.
+ * Se usa para los favoritos, que en SQL solo guardan id + fuente.
+ *
+ * @param {string} id imdbID (OMDB) o _id (MongoDB).
+ * @param {"omdb"|"mongo"} source
+ * @returns {Promise<MovieResult|null>} La película, o null si ya no existe.
+ */
+const getMovieBySource = async (id, source) => {
+    if (source === "omdb") {
+        return omdbService.getById(id);
+    }
+
+    if (source === "mongo") {
+        const doc = await Movie.findById(id).lean();
+        return doc ? normalizeMongoMovie(doc) : null;
+    }
+
+    return null;
+};
+
 module.exports = {
     normalizeMongoMovie,
     searchMovies,
+    createMovie,
     updateMovie,
-    deleteMovie
+    deleteMovie,
+    getMovieBySource
 };
