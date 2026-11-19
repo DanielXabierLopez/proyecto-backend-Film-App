@@ -5,6 +5,8 @@ const isAuthenticated = require('../middlewares/auth.middleware');
 
 // Rutas públicas (login, registro, etc.)
 router.post('/login', authController.login);
+router.get('/google', authController.googleAuth);
+router.get('/google/callback', authController.googleCallback);
 
 /**
  * @swagger
