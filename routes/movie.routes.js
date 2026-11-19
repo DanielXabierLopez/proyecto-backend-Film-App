@@ -177,6 +177,7 @@ router.put("/movie/:id", checkRole(["admin"]), movieController.updateMovie);
  * /api/movie/{id}:
  *   delete:
  *     summary: Eliminar una película (solo admin)
+ *     description: Borra la película de MongoDB y también los favoritos asociados en SQL (de todos los usuarios).
  *     tags: [Movies]
  *     parameters:
  *       - in: path
@@ -188,6 +189,20 @@ router.put("/movie/:id", checkRole(["admin"]), movieController.updateMovie);
  *     responses:
  *       200:
  *         description: Película eliminada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Película eliminada
+ *                 movie:
+ *                   $ref: '#/components/schemas/Movie'
+ *                 favoritesDeleted:
+ *                   type: integer
+ *                   description: Favoritos borrados en SQL
+ *                   example: 2
  *       400:
  *         description: Id no válido
  *       401:
