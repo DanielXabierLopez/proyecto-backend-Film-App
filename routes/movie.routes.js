@@ -91,6 +91,50 @@ router.get("/movie/:title", movieController.getMovieByTitle);
 
 /**
  * @swagger
+ * /api/movie:
+ *   post:
+ *     summary: Crear una película (solo admin)
+ *     description: Todos los campos son obligatorios. `actors` puede ser un array o un texto separado por comas.
+ *     tags: [Movies]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             example:
+ *               title: The Matrix
+ *               poster: https://example.com/matrix.jpg
+ *               year: 1999
+ *               director: Lana Wachowski, Lilly Wachowski
+ *               genre: Action, Sci-Fi
+ *               runtime: 136
+ *               synopsis: Un hacker descubre que el mundo es una simulación.
+ *               actors: [Keanu Reeves, Carrie-Anne Moss]
+ *               rating: 8.7
+ *     responses:
+ *       201:
+ *         description: Película creada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 movie:
+ *                   $ref: '#/components/schemas/Movie'
+ *       400:
+ *         description: Datos que no pasan la validación
+ *       401:
+ *         description: No autenticado
+ *       403:
+ *         description: No es administrador
+ *       500:
+ *         description: Error al crear la película
+ */
+router.post("/movie", checkRole(["admin"]), movieController.createMovie);
+
+/**
+ * @swagger
  * /api/movie/{id}:
  *   put:
  *     summary: Editar una película (solo admin)
