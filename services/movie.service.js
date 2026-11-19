@@ -101,9 +101,31 @@ const deleteMovie = async (id) => {
     return movie ? normalizeMongoMovie(movie) : null;
 };
 
+/**
+ * Obtiene una película completa pidiéndola a su fuente original.
+ * Se usa para los favoritos, que en SQL solo guardan id + fuente.
+ *
+ * @param {string} id imdbID (OMDB) o _id (MongoDB).
+ * @param {"omdb"|"mongo"} source
+ * @returns {Promise<MovieResult|null>} La película, o null si ya no existe.
+ */
+const getMovieBySource = async (id, source) => {
+    if (source === "omdb") {
+        return omdbService.getById(id);
+    }
+
+    if (source === "mongo") {
+        const doc = await Movie.findById(id).lean();
+        return doc ? normalizeMongoMovie(doc) : null;
+    }
+
+    return null;
+};
+
 module.exports = {
     normalizeMongoMovie,
     searchMovies,
     updateMovie,
-    deleteMovie
+    deleteMovie,
+    getMovieBySource
 };
