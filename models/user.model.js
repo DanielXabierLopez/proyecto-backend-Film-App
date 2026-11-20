@@ -56,7 +56,6 @@ const findOrCreateGoogleUser = async ({ googleId, email, name }) => {
 
 module.exports = {
   findByEmail,
-  findByEmail,
   findByGoogleId,
   findOrCreateGoogleUser,
 };
