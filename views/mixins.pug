@@ -26,11 +26,16 @@ mixin movieCard(movie)
 //- Formulario "Añadir a Favoritos": solo manda el id y el origen (OMDB o MongoDB),
 //- no los datos de la película (ver "Sobre el modelo de datos" en el README).
 //- public/js/favorites.js lo envía con fetch para no salir de la página.
+//- Si ya es favorita (movie.isFavorite, lo pone favoriteService.markFavorites)
+//- el botón sale desactivado, igual que tras añadirla con fetch.
 mixin addFavorite(movie)
   form.js-add-favorite(method="POST" action="/api/favorites")
     input(type="hidden" name="movieId" value=movie.id)
     input(type="hidden" name="source" value=movie.source)
-    button.btn.btn--primary(type="submit") ★ Añadir a Favoritos
+    if movie.isFavorite
+      button.btn.btn--primary(type="submit" disabled) ★ En Mis películas
+    else
+      button.btn.btn--primary(type="submit") ★ Añadir a Favoritos
     p.card__msg(role="status")
 
 //- Campos de la película (crear y editar usan el mismo formulario)

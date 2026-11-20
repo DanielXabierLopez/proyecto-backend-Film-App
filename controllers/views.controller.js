@@ -44,6 +44,7 @@ const getSearch = async (req, res) => {
     if (query) {
         try {
             movies = await movieService.searchMovies(query);
+            movies = await favoriteService.markFavorites(req.user?.id, movies);
         } catch (err) {
             console.error('Error en GET /search:', err);
             error = 'No se han podido buscar películas. Inténtalo de nuevo.';
@@ -79,6 +80,10 @@ const getDetail = async (req, res) => {
             ) ||
             movies[0] ||
             null;
+
+        if (movie) {
+            [movie] = await favoriteService.markFavorites(req.user?.id, [movie]);
+        }
 
     } catch (err) {
         console.error('Error en GET /search/:title:', err);

@@ -30,6 +30,36 @@ const getFavoriteMovies = async (userId) => {
         .map((result) => result.value);
 };
 
+/**
+ * Añade `isFavorite` a cada película según los favoritos del usuario,
+ * para que las vistas pinten el botón "Añadir a Favoritos" ya desactivado.
+ * Solo lee la tabla `favorites` (no pide nada a OMDB ni a MongoDB).
+ * Si no hay usuario o falla la consulta, se devuelven todas como no favoritas
+ * para no romper la búsqueda por esto.
+ *
+ * @param {number|undefined} userId
+ * @param {MovieResult[]} movies
+ * @returns {Promise<(MovieResult & { isFavorite: boolean })[]>}
+ */
+const markFavorites = async (userId, movies) => {
+    let keys = new Set();
+
+    if (userId && movies.length) {
+        try {
+            const favorites = await Favorite.getByUser(userId);
+            keys = new Set(favorites.map((fav) => `${fav.source}:${fav.movie_id}`));
+        } catch (err) {
+            console.error("Error cargando favoritos del usuario:", err);
+        }
+    }
+
+    return movies.map((movie) => ({
+        ...movie,
+        isFavorite: keys.has(`${movie.source}:${movie.id}`)
+    }));
+};
+
 module.exports = {
-    getFavoriteMovies
+    getFavoriteMovies,
+    markFavorites
 };
