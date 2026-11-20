@@ -129,8 +129,62 @@ const googleCallback = async (req, res) => {
   }
 };
 
+const signup = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    const cleanName = typeof name === 'string' ? name.trim() : '';
+    const cleanEmail = typeof email === 'string' ? email.trim().toLowerCase() : '';
+
+    if (!cleanName || !cleanEmail || !password) {
+      return res.status(400).render('signup', {
+        error: 'Completa nombre, email y contraseña',
+      });
+    }
+
+    const saltRounds = 10;
+    const passwordHash = await bcrypt.hash(password, saltRounds);
+
+    const user = await userModel.createUser({
+      name: cleanName,
+      email: cleanEmail,
+      passwordHash,
+    });
+
+    const token = jwt.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
+      JWT_SECRET,
+      { expiresIn: JWT_EXPIRES_IN }
+    );
+
+    res.cookie('token', token, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    return res.redirect('/dashboard');
+  } catch (err) {
+    if (err && err.code === '23505') {
+      return res.status(400).render('signup', {
+        error: 'Ese email ya está registrado',
+      });
+    }
+
+    console.error('Error en signup:', err);
+    return res.status(500).render('signup', {
+      error: 'Error interno al registrar el usuario',
+    });
+  }
+};
+
 module.exports = {
   login,
+  signup,
   googleAuth,
   googleCallback,
 };
