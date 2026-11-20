@@ -72,15 +72,50 @@ const searchMovies = async (title) => {
 };
 
 /**
+ * Devuelve todas las películas de MongoDB, de la más reciente a la más antigua.
+ * Se usa en la vista de gestión del administrador (/movies).
+ *
+ * @returns {Promise<MovieResult[]>}
+ */
+const getAllMovies = async () => {
+    const docs = await Movie.find().sort({ createdAt: -1 }).lean();
+
+    return docs.map(normalizeMongoMovie);
+};
+
+/**
+ * Si `actors` llega como texto ("Actor 1, Actor 2", típico de un formulario),
+ * lo convierte en array. Si ya es un array (o no viene), lo deja igual.
+ *
+ * @param {string|string[]|undefined} actors
+ * @returns {string[]|undefined}
+ */
+const parseActors = (actors) => {
+    if (typeof actors !== "string") {
+        return actors;
+    }
+
+    return actors
+        .split(",")
+        .map((actor) => actor.trim())
+        .filter((actor) => actor !== "");
+};
+
+/**
  * Edita una película de MongoDB.
  * - runValidators: aplica las validaciones del modelo también al editar.
  * - returnDocument 'after': devuelve la película ya editada (no la antigua).
+ * - `actors` en texto se convierte en array (igual que al crear).
  *
  * @param {string} id _id de la película en MongoDB.
  * @param {Object} data Campos nuevos de la película.
  * @returns {Promise<MovieResult|null>} La película editada, o null si no existe.
  */
-const updateMovie = async (id, data) => {
+const updateMovie = async (id, data = {}) => {
+    if (data.actors !== undefined) {
+        data = { ...data, actors: parseActors(data.actors) };
+    }
+
     const movie = await Movie.findByIdAndUpdate(id, data, {
         runValidators: true,
         returnDocument: "after"
@@ -114,14 +149,7 @@ const deleteMovie = async (id) => {
  */
 const createMovie = async (data = {}) => {
     const { title, poster, year, director, genre, runtime, synopsis, rating } = data;
-    let { actors } = data;
-
-    if (typeof actors === "string") {
-        actors = actors
-            .split(",")
-            .map((actor) => actor.trim())
-            .filter((actor) => actor !== "");
-    }
+    const actors = parseActors(data.actors);
 
     const movie = await Movie.create({
         title, poster, year, director, genre, runtime, synopsis, actors, rating
@@ -154,6 +182,7 @@ const getMovieBySource = async (id, source) => {
 module.exports = {
     normalizeMongoMovie,
     searchMovies,
+    getAllMovies,
     createMovie,
     updateMovie,
     deleteMovie,

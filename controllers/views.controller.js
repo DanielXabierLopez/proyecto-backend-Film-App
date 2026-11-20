@@ -6,6 +6,7 @@
  * Mientras tanto vale undefined y las vistas lo tienen en cuenta.
  */
 
+const mongoose = require('mongoose');
 const fakeUsers = require('../data/fakeUsers');
 const movieService = require('../services/movie.service');
 const favoriteService = require('../services/favorite.service');
@@ -80,9 +81,18 @@ const getDetail = async (req, res) => {
  */
 const getMovies = async (req, res) => {
     if (req.user && req.user.role === 'admin') {
-        // TODO: pedir todas las películas de MongoDB
-        const movies = [];
-        return res.render('adminMovies', { title: 'Film App - Gestionar películas', user: req.user, movies });
+        // Gestión: todas las películas de MongoDB (las de OMDB no se pueden editar ni borrar)
+        let movies = [];
+        let error = null;
+
+        try {
+            movies = await movieService.getAllMovies();
+        } catch (err) {
+            console.error('Error en GET /movies (admin):', err);
+            error = 'No se han podido cargar las películas. Inténtalo de nuevo.';
+        }
+
+        return res.status(error ? 500 : 200).render('adminMovies', { title: 'Film App - Gestionar películas', user: req.user, movies, error });
     }
 
     // Favoritos del usuario (SQL) con sus datos pedidos a su fuente (OMDB o MongoDB)
@@ -97,6 +107,33 @@ const getMovies = async (req, res) => {
     }
 
     res.status(error ? 500 : 200).render('movies', { title: 'Film App - Mis películas', user: req.user, movies, error });
+};
+
+/**
+ * GET /movies/:id/edit (solo admin)
+ * Formulario de edición con los datos actuales de la película (MongoDB).
+ * Al guardar, public/js/adminMovies.js lo envía con fetch a PUT /api/movie/:id.
+ */
+const getEditMovie = async (req, res) => {
+    const { id } = req.params;
+    let movie = null;
+    let error = null;
+
+    // Si el id no tiene formato de MongoDB, la película no puede existir
+    if (mongoose.isValidObjectId(id)) {
+        try {
+            movie = await movieService.getMovieBySource(id, 'mongo');
+        } catch (err) {
+            console.error('Error en GET /movies/:id/edit:', err);
+            error = 'No se ha podido cargar la película. Inténtalo de nuevo.';
+        }
+    }
+
+    let status = 200;
+    if (error) status = 500;
+    else if (!movie) status = 404;
+
+    res.status(status).render('editMovie', { title: 'Film App - Editar película', user: req.user, movie, error });
 };
 
 /** GET /profile - Perfil del usuario o del administrador */
@@ -121,6 +158,7 @@ module.exports = {
     getSearch,
     getDetail,
     getMovies,
+    getEditMovie,
     getProfile,
     getUsers
 };
