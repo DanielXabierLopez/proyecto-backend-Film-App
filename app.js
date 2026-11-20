@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const cookieParser = require('cookie-parser');
 require('dotenv').config();
 require('./config/sqlDB');
 const connectDB = require('./config/mongoDB');
@@ -10,6 +11,7 @@ const viewsRoutes = require("./routes/views.routes");
 const movieRoutes = require("./routes/movie.routes");
 const favoritesRoutes = require("./routes/favorites.routes");
 const fakeUser = require('./middlewares/fakeUser.middleware');
+const authController = require('./controllers/auth.controller');
 const checkRole = require('./middlewares/role.middleware');
 
 const app = express();
@@ -20,6 +22,7 @@ app.set('views', path.join(__dirname, 'views'));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(
@@ -35,6 +38,7 @@ app.use(fakeUser);
 app.use('/', viewsRoutes);
 
 // Rutas de la API
+app.post('/api/login', authController.login);
 app.use('/api', movieRoutes);
 app.use('/api/favorites', checkRole(['user']), favoritesRoutes);
 
