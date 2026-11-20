@@ -39,6 +39,7 @@ app.use('/', viewsRoutes);
 
 // Rutas de la API
 app.post('/api/login', authController.login);
+app.post('/api/signup', authController.signup);
 app.use('/api', movieRoutes);
 app.use('/api/favorites', checkRole(['user']), favoritesRoutes);
 

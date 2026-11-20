@@ -54,8 +54,19 @@ const findOrCreateGoogleUser = async ({ googleId, email, name }) => {
   return rows[0];
 };
 
+const createUser = async ({ name, email, passwordHash, role = 'user' }) => {
+  const query = `
+    INSERT INTO users (name, email, password_hash, role)
+    VALUES ($1, $2, $3, $4)
+    RETURNING id, name, email, password_hash, google_id, role, created_at
+  `;
+  const { rows } = await pool.query(query, [name, email, passwordHash, role]);
+  return rows[0];
+};
+
 module.exports = {
   findByEmail,
   findByGoogleId,
   findOrCreateGoogleUser,
+  createUser,
 };
