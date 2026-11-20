@@ -1,5 +1,6 @@
 const express = require('express');
 const views = require('../controllers/views.controller');
+const checkRole = require('../middlewares/role.middleware');
 
 const router = express.Router();
 
@@ -15,6 +16,7 @@ router.get('/search', views.getSearch);
 router.get('/search/:title', views.getDetail);
 router.get('/movies', views.getMovies);
 router.get('/favorites', views.getMovies);
+router.get('/movies/:id/edit', checkRole(['admin']), views.getEditMovie);
 router.get('/profile', views.getProfile);
 router.get('/users', views.getUsers);
 
