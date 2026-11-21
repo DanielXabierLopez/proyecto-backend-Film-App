@@ -11,6 +11,7 @@ const mongoose = require('mongoose');
 const fakeUsers = require('../data/fakeUsers');
 const movieService = require('../services/movie.service');
 const favoriteService = require('../services/favorite.service');
+const userModel = require('../models/user.model');
 
 /** GET / - Inicio con formulario de login */
 const getHome = (req, res) => {
@@ -180,11 +181,31 @@ const getEditMovie = async (req, res) => {
     res.status(status).render('editMovie', { title: 'Film App - Editar película', user: req.user, movie, error });
 };
 
-/** GET /profile - Perfil del usuario o del administrador */
-const getProfile = (req, res) => {
-    res.render('profile', {
+/**
+ * GET /profile - Perfil del usuario o del administrador.
+ * Los datos se leen de la BD (SQL) y no del token, que puede tener datos antiguos.
+ * El formulario lo envía public/js/profile.js con fetch a PUT /api/user.
+ */
+const getProfile = async (req, res) => {
+    let profile = null;
+    let error = null;
+
+    try {
+        profile = await userModel.findById(req.user.id);
+    } catch (err) {
+        console.error('Error en GET /profile:', err);
+        error = 'No se ha podido cargar tu perfil. Inténtalo de nuevo.';
+    }
+
+    let status = 200;
+    if (error) status = 500;
+    else if (!profile) status = 404;
+
+    res.status(status).render('profile', {
         title: 'Film App - Mi perfil',
-        user: req.user
+        user: req.user,
+        profile,
+        error
     });
 };
 
