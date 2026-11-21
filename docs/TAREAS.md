@@ -16,8 +16,8 @@
 ~~Configurar Swagger~~
 
 ### 2. Autenticación
-POST /api/signup: registro con contraseña cifrada, abrir sesión y redirigir a /dashboard
-POST /api/login con JWT y redirección según rol
+~~POST /api/signup: registro con contraseña cifrada, abrir sesión y redirigir a /dashboard~~
+~~POST /api/login con JWT y redirección según rol~~
 Middleware que comprueba la sesión (si no hay, redirige a /)
 ~~Middleware que comprueba el rol (usuario / admin)~~
 POST /api/logout
@@ -43,7 +43,7 @@ Control de acceso por rol: el admin solo puede entrar en /movies y el usuario no
 ~~POST /api/movie con validación~~
 ~~PUT /api/movie con validación~~
 ~~DELETE /api/movie, que también borra los favoritos asociados en SQL~~
-Vista de gestión: listado, crear, editar (formulario ya rellenado) y eliminar (con confirmación)
+~~Vista de gestión: listado, crear, editar (formulario ya rellenado) y eliminar (con confirmación)~~
 
 ### 6. Vistas generales
 ~~Dashboard /dashboard con dos botones con icono y la opción de salir~~
