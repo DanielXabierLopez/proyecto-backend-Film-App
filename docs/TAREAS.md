@@ -50,9 +50,9 @@
 ~~Menú hamburguesa con efecto persiana, distinto según el rol~~
 
 ### 7. Usuarios y perfil
-GET /api/user
-PUT /api/user
-Vista /profile con formulario de edición
+~~GET /api/user~~
+~~PUT /api/user~~
+~~Vista /profile con formulario de edición~~
 DELETE /api/user (admin)
 Vista /users (admin) con CRUD de usuarios
 
