@@ -20,7 +20,19 @@ const COOKIE_OPTIONS = {
 };
 const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000;
 
+/**
+ * Página de inicio de cada rol (README, "Formulario de acceso"):
+ * el administrador a /movies (gestión) y el usuario a /dashboard.
+ * La usan el login (adónde ir tras entrar) y checkRole (adónde mandar
+ * a quien abre una vista que no es de su rol).
+ *
+ * @param {"user"|"admin"} role
+ * @returns {string}
+ */
+const getHomeByRole = (role) => (role === 'admin' ? '/movies' : '/dashboard');
+
 module.exports = {
+  getHomeByRole,
   JWT_SECRET,
   JWT_EXPIRES_IN,
   COOKIE_OPTIONS,

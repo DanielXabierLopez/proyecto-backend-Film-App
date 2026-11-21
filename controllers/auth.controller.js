@@ -12,19 +12,14 @@ const {
   JWT_EXPIRES_IN,
   COOKIE_OPTIONS,
   COOKIE_MAX_AGE,
+  getHomeByRole,
 } = require('../config/session');
 
 /**
- * Página a la que se va después de iniciar sesión (README, "Formulario de acceso"):
- * el administrador a /movies (su única vista) y el usuario a /dashboard.
- *
- * @param {"user"|"admin"} role
- * @returns {string}
+ * Página a la que se va después de iniciar sesión: la de inicio de su rol
+ * (admin → /movies, usuario → /dashboard). Ver getHomeByRole en config/session.js.
  */
-const getRedirectByRole = (role) => {
-  if (role === 'admin') return '/movies';
-  return '/dashboard';
-};
+const getRedirectByRole = getHomeByRole;
 
 /**
  * Abre la sesión: firma el JWT y lo guarda en la cookie `token` (httpOnly).
