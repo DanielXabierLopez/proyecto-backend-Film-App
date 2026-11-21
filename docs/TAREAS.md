@@ -53,8 +53,8 @@
 ~~GET /api/user~~
 ~~PUT /api/user~~
 ~~Vista /profile con formulario de edición~~
-DELETE /api/user (admin)
-Vista /users (admin) con CRUD de usuarios
+~~DELETE /api/user (admin)~~
+~~Vista /users (admin) con CRUD de usuarios~~
 
 ### 8. Calidad y entrega
 Documentación con JSDoc en las funciones importantes
