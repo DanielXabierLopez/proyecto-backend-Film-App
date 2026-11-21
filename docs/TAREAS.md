@@ -21,7 +21,7 @@
 ~~Middleware que comprueba la sesión (si no hay, redirige a /)~~
 ~~Middleware que comprueba el rol (usuario / admin)~~
 ~~POST /api/logout~~
-Control de acceso por rol: el admin solo puede entrar en /movies y el usuario no puede entrar en la gestión de películas
+~~Control de acceso por rol: el admin solo puede entrar en /movies y el usuario no puede entrar en la gestión de películas~~
 ~~Vista de registro GET /signup~~
 ~~Vista de login (GET / y/o /login)~~
 ~~Login con proveedor externo mediante OAuth (Google, GitHub…)~~
