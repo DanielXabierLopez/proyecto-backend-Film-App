@@ -2,8 +2,9 @@
  * Controlador de las vistas web (Server Side Rendering con Pug).
  * Cada función pinta una plantilla de /views con los datos que necesita.
  *
- * `req.user` lo rellenará el middleware de autenticación cuando esté hecho.
- * Mientras tanto vale undefined y las vistas lo tienen en cuenta.
+ * En las vistas privadas, `req.user` lo rellena middlewares/auth.middleware.js
+ * con los datos del token (id, email, name, role). En las públicas
+ * (/, /login, /signup) vale undefined y las vistas lo tienen en cuenta.
  */
 
 const mongoose = require('mongoose');
