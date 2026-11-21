@@ -15,13 +15,25 @@ router.get('/signup', views.getSignup);
 // en "/", así que un router.use() también bloquearía las rutas públicas de la API
 // (/api/login, /api/signup…) que se registran después en app.js.
 // isAuthenticated siempre antes de checkRole, que necesita req.user.
-router.get('/dashboard', isAuthenticated, views.getDashboard);
-router.get('/search', isAuthenticated, views.getSearch);
-router.get('/search/:title', isAuthenticated, views.getDetail);
-router.get('/movies', isAuthenticated, views.getMovies);
-router.get('/favorites', isAuthenticated, views.getMovies);
-router.get('/movies/:id/edit', isAuthenticated, checkRole(['admin']), views.getEditMovie);
-router.get('/profile', isAuthenticated, views.getProfile);
-router.get('/users', isAuthenticated, views.getUsers);
+//
+// Control de acceso por rol: quien abre una vista que no es de su rol
+// vuelve a su página de inicio (admin → /movies, usuario → /dashboard).
+const onlyUser = [isAuthenticated, checkRole(['user'])];
+const onlyAdmin = [isAuthenticated, checkRole(['admin'])];
+const anyRole = [isAuthenticated, checkRole(['user', 'admin'])];
+
+// Solo usuario
+router.get('/dashboard', onlyUser, views.getDashboard);
+router.get('/search', onlyUser, views.getSearch);
+router.get('/search/:title', onlyUser, views.getDetail);
+router.get('/favorites', onlyUser, views.getMovies);
+
+// Solo administrador
+router.get('/movies/:id/edit', onlyAdmin, views.getEditMovie);
+router.get('/users', onlyAdmin, views.getUsers);
+
+// Los dos roles: /movies pinta "Mis películas" (usuario) o "Gestionar películas" (admin)
+router.get('/movies', anyRole, views.getMovies);
+router.get('/profile', anyRole, views.getProfile);
 
 module.exports = router;

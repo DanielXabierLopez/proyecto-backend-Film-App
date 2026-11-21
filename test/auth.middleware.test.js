@@ -146,11 +146,46 @@ describe("Vistas: públicas y privadas (views.routes.js)", () => {
         expect(res.text).toBe("dashboard:user");
     });
 
-    test("editar película: un usuario con sesión pero sin rol admin recibe 403", async () => {
-        const res = await request(buildApp())
-            .get("/movies/64b7f0c2a1b2c3d4e5f60718/edit")
-            .set("Cookie", `token=${signToken(lucia)}`);
+});
 
-        expect(res.status).toBe(403);
+describe("Control de acceso por rol en las vistas (views.routes.js)", () => {
+    const admin = { id: 2, email: "admin@filmapp.test", name: "Admin Demo", role: "admin" };
+    const EDIT = "/movies/64b7f0c2a1b2c3d4e5f60718/edit";
+
+    const buildApp = () => {
+        const app = express();
+        app.use(cookieParser());
+        app.use("/", require("../routes/views.routes"));
+        return app;
+    };
+    const getAs = (user, url) => request(buildApp()).get(url).set("Cookie", `token=${signToken(user)}`);
+
+    // [url, ¿entra el usuario?, ¿entra el admin?]
+    test.each([
+        ["/dashboard", true, false],
+        ["/search", true, false],
+        ["/search/matrix", true, false],
+        ["/favorites", true, false],
+        ["/movies", true, true],
+        ["/profile", true, true],
+        [EDIT, false, true],
+        ["/users", false, true]
+    ])("%s → usuario: %s, admin: %s", async (url, userAllowed, adminAllowed) => {
+        const asUser = await getAs(lucia, url);
+        const asAdmin = await getAs(admin, url);
+
+        if (userAllowed) {
+            expect(asUser.status).toBe(200);
+        } else {
+            expect(asUser.status).toBe(302);
+            expect(asUser.headers.location).toBe("/dashboard");
+        }
+
+        if (adminAllowed) {
+            expect(asAdmin.status).toBe(200);
+        } else {
+            expect(asAdmin.status).toBe(302);
+            expect(asAdmin.headers.location).toBe("/movies");
+        }
     });
 });
