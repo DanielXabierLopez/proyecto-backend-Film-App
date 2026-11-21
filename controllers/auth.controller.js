@@ -6,21 +6,13 @@ const {
   exchangeCodeForTokens,
   getGoogleUserProfile,
 } = require('../config/oauth');
-
-const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_cambiar_en_env';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
-
-/**
- * Opciones de la cookie `token`. Abrir y cerrar sesión usan las mismas:
- * el navegador solo borra la cookie si coinciden (path, sameSite, secure…).
- */
-const COOKIE_OPTIONS = {
-  httpOnly: true,
-  sameSite: 'lax',
-  secure: process.env.NODE_ENV === 'production',
-  path: '/',
-};
-const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000;
+// Secreto, caducidad y opciones de la cookie: compartidos con el middleware de sesión
+const {
+  JWT_SECRET,
+  JWT_EXPIRES_IN,
+  COOKIE_OPTIONS,
+  COOKIE_MAX_AGE,
+} = require('../config/session');
 
 /**
  * Página a la que se va después de iniciar sesión (README, "Formulario de acceso"):

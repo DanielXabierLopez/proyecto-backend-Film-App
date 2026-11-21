@@ -10,8 +10,10 @@ const swaggerSpec = require("./config/swagger");
 const viewsRoutes = require("./routes/views.routes");
 const movieRoutes = require("./routes/movie.routes");
 const favoritesRoutes = require("./routes/favorites.routes");
-const fakeUser = require('./middlewares/fakeUser.middleware');
+const userRoutes = require("./routes/user.routes");
+const authRoutes = require('./routes/auth.routes');
 const authController = require('./controllers/auth.controller');
+const isAuthenticated = require('./middlewares/auth.middleware');
 const checkRole = require('./middlewares/role.middleware');
 
 const app = express();
@@ -31,19 +33,22 @@ app.use(
     swaggerUi.setup(swaggerSpec)
 );
 
-// TEMPORAL: usuario falso en req.user hasta que exista la autenticación
-app.use(fakeUser);
-
-// Rutas de las vistas (Pug)
+// Rutas de las vistas (Pug). Cada vista privada lleva su isAuthenticated en views.routes.js
 app.use('/', viewsRoutes);
 
-// Rutas de la API
-// Públicas: login, registro y logout (el logout tiene que funcionar aunque el token haya caducado)
+// Rutas públicas de la API: login, registro, logout y Google OAuth.
+// Van ANTES que las privadas: las privadas se montan en /api con isAuthenticated
+// delante, y cualquier ruta /api registrada después pasaría también por él.
+// (El logout es público para que funcione aunque el token haya caducado.)
 app.post('/api/login', authController.login);
 app.post('/api/signup', authController.signup);
 app.post('/api/logout', authController.logout);
-app.use('/api', movieRoutes);
-app.use('/api/favorites', checkRole(['user']), favoritesRoutes);
+app.use('/api/auth', authRoutes);
+
+// Rutas privadas de la API: sin sesión responden 401.
+// isAuthenticated siempre antes de checkRole, que necesita req.user.
+app.use('/api/favorites', isAuthenticated, checkRole(['user']), favoritesRoutes);
+app.use('/api', isAuthenticated, movieRoutes, userRoutes);
 
 // Solo arrancamos el servidor si MongoDB conecta
 connectDB()
@@ -56,9 +61,4 @@ connectDB()
         console.error('No se pudo conectar a MongoDB. El servidor no se ha iniciado.');
         process.exit(1);
     });
-const userRoutes = require("./routes/user.routes");
 
-app.use("/api", userRoutes);
-
-const authRoutes = require('./routes/auth.routes');
-app.use('/api/auth', authRoutes);
