@@ -17,7 +17,7 @@ jest.mock("../config/oauth", () => ({
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const userModel = require("../models/user.model");
-const { login, signup, getRedirectByRole } = require("../controllers/auth.controller");
+const { login, logout, signup, getRedirectByRole } = require("../controllers/auth.controller");
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev_secret_cambiar_en_env";
 const PASSWORD = "123456";
@@ -37,6 +37,7 @@ const mockResponse = () => {
     res.render = jest.fn().mockReturnValue(res);
     res.redirect = jest.fn().mockReturnValue(res);
     res.cookie = jest.fn().mockReturnValue(res);
+    res.clearCookie = jest.fn().mockReturnValue(res);
     return res;
 };
 
@@ -202,5 +203,49 @@ describe("Token igual en login y signup", () => {
 
         expect(res.redirect).toHaveBeenCalledWith("/dashboard");
         expect(tokenFromCookie(res)).toMatchObject({ id: 3, name: "Nueva", role: "user" });
+    });
+});
+
+describe("POST /api/logout", () => {
+    test("formulario (botón Salir): borra la cookie token y redirige a /", () => {
+        const res = mockResponse();
+
+        logout(mockRequest({}), res);
+
+        expect(res.clearCookie).toHaveBeenCalledWith("token", expect.objectContaining({ httpOnly: true, path: "/" }));
+        expect(res.redirect).toHaveBeenCalledWith("/");
+        expect(res.json).not.toHaveBeenCalled();
+    });
+
+    test("JSON: borra la cookie y responde 200 con redirectTo", () => {
+        const res = mockResponse();
+
+        logout(mockRequest({}, { json: true }), res);
+
+        expect(res.clearCookie).toHaveBeenCalledWith("token", expect.any(Object));
+        expect(res.status).toHaveBeenCalledWith(200);
+        expect(res.json).toHaveBeenCalledWith({ message: "Sesión cerrada", redirectTo: "/" });
+        expect(res.redirect).not.toHaveBeenCalled();
+    });
+
+    test("funciona sin sesión (no necesita req.user ni token)", () => {
+        const res = mockResponse();
+        const req = mockRequest(undefined);
+
+        expect(() => logout(req, res)).not.toThrow();
+        expect(res.redirect).toHaveBeenCalledWith("/");
+    });
+
+    test("borra la cookie con las mismas opciones con las que se creó", async () => {
+        userModel.findByEmail.mockResolvedValue(dbUser("user"));
+        const loginRes = mockResponse();
+        await login(mockRequest({ email: "lucia@filmapp.test", password: PASSWORD }), loginRes);
+        const { maxAge, ...createdOptions } = loginRes.cookie.mock.calls[0][2];
+
+        const res = mockResponse();
+        logout(mockRequest({}), res);
+
+        expect(maxAge).toBeGreaterThan(0);
+        expect(res.clearCookie.mock.calls[0][1]).toEqual(createdOptions);
     });
 });

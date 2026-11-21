@@ -38,8 +38,10 @@ app.use(fakeUser);
 app.use('/', viewsRoutes);
 
 // Rutas de la API
+// Públicas: login, registro y logout (el logout tiene que funcionar aunque el token haya caducado)
 app.post('/api/login', authController.login);
 app.post('/api/signup', authController.signup);
+app.post('/api/logout', authController.logout);
 app.use('/api', movieRoutes);
 app.use('/api/favorites', checkRole(['user']), favoritesRoutes);
 

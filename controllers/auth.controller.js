@@ -11,6 +11,18 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev_secret_cambiar_en_env';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1d';
 
 /**
+ * Opciones de la cookie `token`. Abrir y cerrar sesión usan las mismas:
+ * el navegador solo borra la cookie si coinciden (path, sameSite, secure…).
+ */
+const COOKIE_OPTIONS = {
+  httpOnly: true,
+  sameSite: 'lax',
+  secure: process.env.NODE_ENV === 'production',
+  path: '/',
+};
+const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000;
+
+/**
  * Página a la que se va después de iniciar sesión (README, "Formulario de acceso"):
  * el administrador a /movies (su única vista) y el usuario a /dashboard.
  *
@@ -45,14 +57,24 @@ const createSession = (res, user) => {
     { expiresIn: JWT_EXPIRES_IN }
   );
 
-  res.cookie('token', token, {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000,
-  });
+  res.cookie('token', token, { ...COOKIE_OPTIONS, maxAge: COOKIE_MAX_AGE });
 
   return token;
+};
+
+/**
+ * POST /api/logout
+ * Cierra la sesión borrando la cookie `token` y vuelve al inicio (README).
+ * Es pública: funciona aunque el token ya haya caducado o no exista.
+ * Como el JWT no se guarda en el servidor, cerrar sesión = borrar la cookie.
+ */
+const logout = (req, res) => {
+  res.clearCookie('token', COOKIE_OPTIONS);
+
+  if (wantsJson(req)) {
+    return res.status(200).json({ message: 'Sesión cerrada', redirectTo: '/' });
+  }
+  return res.redirect('/');
 };
 
 /**
@@ -199,6 +221,7 @@ const signup = async (req, res) => {
 module.exports = {
   getRedirectByRole,
   login,
+  logout,
   signup,
   googleAuth,
   googleCallback,
