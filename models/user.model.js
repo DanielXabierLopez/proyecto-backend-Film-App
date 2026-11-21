@@ -64,9 +64,51 @@ const createUser = async ({ name, email, passwordHash, role = 'user' }) => {
   return rows[0];
 };
 
+/**
+ * Datos públicos de un usuario por su id (sin password_hash ni google_id).
+ * Lo usan GET /api/user y la vista /profile.
+ *
+ * @param {number} id
+ * @returns {Promise<{id: number, name: string, email: string, role: string, created_at: Date}|null>}
+ */
+const findById = async (id) => {
+  const query = `
+    SELECT id, name, email, role, created_at
+    FROM users
+    WHERE id = $1
+    LIMIT 1
+  `;
+  const { rows } = await pool.query(query, [id]);
+  return rows[0] || null;
+};
+
+/**
+ * Edita el nombre y el email de un usuario (PUT /api/user).
+ * Solo esos dos campos: nunca el rol, el id ni la contraseña.
+ * Si el email ya lo usa otro usuario, Postgres lanza el error 23505
+ * (índice único ux_users_email, ver docs/schema.sql).
+ *
+ * @param {number} id
+ * @param {{name: string, email: string}} data
+ * @returns {Promise<{id: number, name: string, email: string, role: string, created_at: Date}|null>}
+ *   El usuario editado, o null si no existe.
+ */
+const updateUser = async (id, { name, email }) => {
+  const query = `
+    UPDATE users
+    SET name = $1, email = $2
+    WHERE id = $3
+    RETURNING id, name, email, role, created_at
+  `;
+  const { rows } = await pool.query(query, [name, email, id]);
+  return rows[0] || null;
+};
+
 module.exports = {
   findByEmail,
   findByGoogleId,
+  findById,
   findOrCreateGoogleUser,
   createUser,
+  updateUser,
 };

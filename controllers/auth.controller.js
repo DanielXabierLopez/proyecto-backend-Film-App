@@ -1,53 +1,20 @@
 const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const userModel = require('../models/user.model');
 const {
   getGoogleAuthUrl,
   exchangeCodeForTokens,
   getGoogleUserProfile,
 } = require('../config/oauth');
-// Secreto, caducidad y opciones de la cookie: compartidos con el middleware de sesión
-const {
-  JWT_SECRET,
-  JWT_EXPIRES_IN,
-  COOKIE_OPTIONS,
-  COOKIE_MAX_AGE,
-  getHomeByRole,
-} = require('../config/session');
+// Opciones de la cookie (para borrarla en el logout) y página de inicio de cada rol
+const { COOKIE_OPTIONS, getHomeByRole } = require('../config/session');
+// Firma el JWT y lo guarda en la cookie: compartido con la edición del perfil
+const { createSession } = require('../services/session.service');
 
 /**
  * Página a la que se va después de iniciar sesión: la de inicio de su rol
  * (admin → /movies, usuario → /dashboard). Ver getHomeByRole en config/session.js.
  */
 const getRedirectByRole = getHomeByRole;
-
-/**
- * Abre la sesión: firma el JWT y lo guarda en la cookie `token` (httpOnly).
- * La usan login, Google y signup, para que el token tenga siempre los mismos
- * datos: los que lee middlewares/auth.middleware.js para rellenar `req.user`.
- * Nunca incluye la contraseña.
- *
- * @param {Object} res Respuesta de Express.
- * @param {{id: number, email: string, name: string, role: string}} user
- * @returns {string} El token firmado.
- */
-const createSession = (res, user) => {
-  const token = jwt.sign(
-    {
-      sub: user.id,
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-    },
-    JWT_SECRET,
-    { expiresIn: JWT_EXPIRES_IN }
-  );
-
-  res.cookie('token', token, { ...COOKIE_OPTIONS, maxAge: COOKIE_MAX_AGE });
-
-  return token;
-};
 
 /**
  * POST /api/logout
