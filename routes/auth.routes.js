@@ -44,7 +44,24 @@ const isAuthenticated = require('../middlewares/auth.middleware');
  *         description: Error interno en el login
  */
 
-// Rutas públicas de Google OAuth (el login con email está en app.js: POST /api/login)
+/**
+ * @swagger
+ * /api/logout:
+ *   post:
+ *     summary: Cerrar sesión
+ *     description: |
+ *       Ruta registrada en app.js (no aquí, porque este router está montado en /api/auth).
+ *       Borra la cookie `token`. Es pública: funciona aunque el token haya caducado.
+ *       Desde el botón "Salir" de la vista redirige a /; si se envía JSON responde con JSON.
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Sesión cerrada (petición JSON). Incluye `redirectTo`.
+ *       302:
+ *         description: Sesión cerrada (formulario). Redirige a /.
+ */
+
+// Rutas públicas de Google OAuth (login y logout con email están en app.js)
 router.get('/google', authController.googleAuth);
 router.get('/google/callback', authController.googleCallback);
 
