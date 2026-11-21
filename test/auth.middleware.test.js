@@ -112,7 +112,8 @@ describe("Vistas: públicas y privadas (views.routes.js)", () => {
         return {
             getHome: ok("home"), getLogin: ok("login"), getSignup: ok("signup"),
             getDashboard: ok("dashboard"), getSearch: ok("search"), getDetail: ok("detail"),
-            getMovies: ok("movies"), getEditMovie: ok("edit"), getProfile: ok("profile"), getUsers: ok("users")
+            getMovies: ok("movies"), getEditMovie: ok("edit"), getProfile: ok("profile"), getUsers: ok("users"),
+            getEditUser: ok("editUser")
         };
     });
 
@@ -130,7 +131,7 @@ describe("Vistas: públicas y privadas (views.routes.js)", () => {
 
     test.each([
         "/dashboard", "/search", "/search/matrix", "/movies", "/favorites",
-        "/movies/64b7f0c2a1b2c3d4e5f60718/edit", "/profile", "/users"
+        "/movies/64b7f0c2a1b2c3d4e5f60718/edit", "/profile", "/users", "/users/3/edit"
     ])("%s sin sesión redirige a /", async (url) => {
         const res = await request(buildApp()).get(url);
         expect(res.status).toBe(302);
@@ -169,7 +170,8 @@ describe("Control de acceso por rol en las vistas (views.routes.js)", () => {
         ["/movies", true, true],
         ["/profile", true, true],
         [EDIT, false, true],
-        ["/users", false, true]
+        ["/users", false, true],
+        ["/users/3/edit", false, true]
     ])("%s → usuario: %s, admin: %s", async (url, userAllowed, adminAllowed) => {
         const asUser = await getAs(lucia, url);
         const asAdmin = await getAs(admin, url);

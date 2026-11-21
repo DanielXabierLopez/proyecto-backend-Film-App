@@ -8,7 +8,6 @@
  */
 
 const mongoose = require('mongoose');
-const fakeUsers = require('../data/fakeUsers');
 const movieService = require('../services/movie.service');
 const favoriteService = require('../services/favorite.service');
 const userModel = require('../models/user.model');
@@ -209,17 +208,58 @@ const getProfile = async (req, res) => {
     });
 };
 
-/** GET /users - Lista de usuarios (admin) */
+/**
+ * GET /users - Gestión de usuarios (solo admin): lista real de la BD (SQL).
+ * Crear, editar y borrar se hacen con fetch desde public/js/adminUsers.js.
+ */
 const getUsers = async (req, res) => {
+    let users = [];
+    let error = null;
 
-    // TODO: pedir la lista de usuarios a la base de datos SQL
-    // TEMPORAL: mientras tanto usamos los usuarios falsos
-    const users = fakeUsers;
+    try {
+        users = await userModel.findAll();
+    } catch (err) {
+        console.error('Error en GET /users:', err);
+        error = 'No se han podido cargar los usuarios. Inténtalo de nuevo.';
+    }
 
-    res.render('users', {
+    res.status(error ? 500 : 200).render('users', {
         title: 'Film App - Usuarios',
         user: req.user,
-        users
+        users,
+        error
+    });
+};
+
+/**
+ * GET /users/:id/edit (solo admin)
+ * Formulario de edición con los datos actuales del usuario (SQL).
+ * Al guardar, public/js/adminUsers.js lo envía con fetch a PUT /api/user/:id.
+ */
+const getEditUser = async (req, res) => {
+    const id = Number(req.params.id);
+    let editUser = null;
+    let error = null;
+
+    // Si el id no es un número entero positivo, el usuario no puede existir
+    if (Number.isInteger(id) && id > 0) {
+        try {
+            editUser = await userModel.findById(id);
+        } catch (err) {
+            console.error('Error en GET /users/:id/edit:', err);
+            error = 'No se ha podido cargar el usuario. Inténtalo de nuevo.';
+        }
+    }
+
+    let status = 200;
+    if (error) status = 500;
+    else if (!editUser) status = 404;
+
+    res.status(status).render('editUser', {
+        title: 'Film App - Editar usuario',
+        user: req.user,
+        editUser,
+        error
     });
 };
 
@@ -233,5 +273,6 @@ module.exports = {
     getMovies,
     getEditMovie,
     getProfile,
-    getUsers
+    getUsers,
+    getEditUser
 };

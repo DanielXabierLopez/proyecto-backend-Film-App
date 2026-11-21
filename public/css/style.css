@@ -121,7 +121,8 @@ img {
 }
 
 input,
-textarea {
+textarea,
+select {
     width: 100%;
     padding: 0.7rem;
     border: 1px solid var(--surface-2);
@@ -132,7 +133,8 @@ textarea {
 }
 
 input:focus,
-textarea:focus {
+textarea:focus,
+select:focus {
     outline: 2px solid var(--primary);
     outline-offset: 1px;
 }
