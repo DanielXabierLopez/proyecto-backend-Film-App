@@ -31,6 +31,7 @@ router.get('/favorites', onlyUser, views.getMovies);
 // Solo administrador
 router.get('/movies/:id/edit', onlyAdmin, views.getEditMovie);
 router.get('/users', onlyAdmin, views.getUsers);
+router.get('/users/:id/edit', onlyAdmin, views.getEditUser);
 
 // Los dos roles: /movies pinta "Mis películas" (usuario) o "Gestionar películas" (admin)
 router.get('/movies', anyRole, views.getMovies);

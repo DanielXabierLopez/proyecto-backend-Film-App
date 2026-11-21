@@ -104,11 +104,67 @@ const updateUser = async (id, { name, email }) => {
   return rows[0] || null;
 };
 
+/**
+ * Lista de todos los usuarios para la vista /users (admin), sin datos de acceso
+ * (ni password_hash ni google_id). `has_google` indica si puede entrar con Google.
+ *
+ * @returns {Promise<Array<{id: number, name: string, email: string, role: string, created_at: Date, has_google: boolean}>>}
+ */
+const findAll = async () => {
+  const query = `
+    SELECT id, name, email, role, created_at, (google_id IS NOT NULL) AS has_google
+    FROM users
+    ORDER BY created_at DESC, id DESC
+  `;
+  const { rows } = await pool.query(query);
+  return rows;
+};
+
+/**
+ * El admin edita a cualquier usuario: nombre, email y rol (PUT /api/user/:id).
+ * La contraseña no se toca. Si el email ya existe, Postgres lanza el error 23505.
+ *
+ * @param {number} id
+ * @param {{name: string, email: string, role: "user"|"admin"}} data
+ * @returns {Promise<{id: number, name: string, email: string, role: string, created_at: Date}|null>}
+ *   El usuario editado, o null si no existe.
+ */
+const updateUserByAdmin = async (id, { name, email, role }) => {
+  const query = `
+    UPDATE users
+    SET name = $1, email = $2, role = $3
+    WHERE id = $4
+    RETURNING id, name, email, role, created_at
+  `;
+  const { rows } = await pool.query(query, [name, email, role, id]);
+  return rows[0] || null;
+};
+
+/**
+ * Borra un usuario (DELETE /api/user/:id, admin).
+ * Sus favoritos se borran solos: la tabla favorites tiene ON DELETE CASCADE.
+ *
+ * @param {number} id
+ * @returns {Promise<{id: number, name: string, email: string}|null>} El usuario borrado, o null si no existía.
+ */
+const deleteUser = async (id) => {
+  const query = `
+    DELETE FROM users
+    WHERE id = $1
+    RETURNING id, name, email
+  `;
+  const { rows } = await pool.query(query, [id]);
+  return rows[0] || null;
+};
+
 module.exports = {
   findByEmail,
   findByGoogleId,
   findById,
+  findAll,
   findOrCreateGoogleUser,
   createUser,
   updateUser,
+  updateUserByAdmin,
+  deleteUser,
 };
